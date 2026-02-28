@@ -1,14 +1,15 @@
 const vscode = require('vscode')
 
 const CLASS_ATTRIBUTE_PATTERN =
-  /\b(?:class|className|ngClass|class:list)\s*=\s*(?:"([^"]*)"|'([^']*)'|`([^`]*)`)/g
+  '\\b(?:class|className|ngClass|class:list)\\s*=\\s*(?:"([^"]*)"|\'([^\']*)\'|`([^`]*)`)'
 
 function getClassSelections(document) {
   let text = document.getText()
   let selections = []
+  let classAttributePattern = new RegExp(CLASS_ATTRIBUTE_PATTERN, 'g')
   let match
 
-  while ((match = CLASS_ATTRIBUTE_PATTERN.exec(text)) !== null) {
+  while ((match = classAttributePattern.exec(text)) !== null) {
     let classList = match[1] ?? match[2] ?? match[3]
     if (!classList || !classList.trim()) continue
 
@@ -47,6 +48,7 @@ function activate(context) {
     vscode.workspace.onWillSaveTextDocument((event) => {
       let config = vscode.workspace.getConfiguration('tailwindOCD', event.document.uri)
       if (!config.get('sortOnSave')) return
+      if (event.document.uri.scheme !== 'file') return
 
       if (
         !vscode.window.activeTextEditor ||

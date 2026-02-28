@@ -37,8 +37,13 @@
     "type": "git",
     "url": "git+https://github.com/suryami62/tailwindOCD.git"
   },
-  "keywords": [],
-  "author": "",
+  "keywords": [
+    "tailwindcss",
+    "tailwind",
+    "sorting",
+    "headwind"
+  ],
+  "author": "suryami62",
   "license": "MIT",
   "type": "commonjs",
   "bugs": {
