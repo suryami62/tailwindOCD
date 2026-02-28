@@ -2,8 +2,8 @@
   "name": "tailwindocd",
   "displayName": "Tailwind OCD",
   "icon": "media/icon.png",
-  "description": "Keep your Tailwind classes clean, consistent, and save your PR reviewers from quiet despair.",
-  "version": "0.1.1",
+  "description": "Sort Tailwind classes automatically, clean duplicates/conflicts, and make your PRs look suspiciously well-organized.",
+  "version": "0.2.0",
   "publisher": "suryami62",
   "engines": {
     "vscode": "^1.80.0"
@@ -18,8 +18,12 @@
     "prepackage:vsix": "bun run compile:release",
     "package:vsix": "bunx @vscode/vsce package --skip-license --no-dependencies"
   },
-  "activationEvents": ["onStartupFinished"],
-  "extensionDependencies": ["bradlc.vscode-tailwindcss"],
+  "activationEvents": [
+    "onStartupFinished"
+  ],
+  "extensionDependencies": [
+    "bradlc.vscode-tailwindcss"
+  ],
   "contributes": {
     "commands": [
       {
@@ -40,7 +44,11 @@
           "items": {
             "type": "string"
           },
-          "default": ["clsx", "cn", "classnames"],
+          "default": [
+            "clsx",
+            "cn",
+            "classnames"
+          ],
           "description": "Function names that should be scanned for Tailwind class strings."
         },
         "tailwindOCD.cleanDuplicates": {
@@ -65,7 +73,12 @@
     "type": "git",
     "url": "git+https://github.com/suryami62/tailwindOCD.git"
   },
-  "keywords": ["tailwindcss", "tailwind", "sorting", "headwind"],
+  "keywords": [
+    "tailwindcss",
+    "tailwind",
+    "sorting",
+    "headwind"
+  ],
   "author": "suryami62",
   "license": "MIT",
   "devDependencies": {
