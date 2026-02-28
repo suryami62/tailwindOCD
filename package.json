@@ -1,0 +1,53 @@
+{
+  "name": "tailwindocd",
+  "displayName": "Tailwind OCD",
+  "description": "Sort Tailwind CSS classes like Headwind by using Tailwind CSS IntelliSense sorting",
+  "version": "0.0.1",
+  "publisher": "suryami62",
+  "engines": {
+    "vscode": "^1.80.0"
+  },
+  "main": "./extension.js",
+  "activationEvents": [
+    "onCommand:tailwindOCD.sortTailwindClasses",
+    "onStartupFinished"
+  ],
+  "extensionDependencies": [
+    "bradlc.vscode-tailwindcss"
+  ],
+  "contributes": {
+    "commands": [
+      {
+        "command": "tailwindOCD.sortTailwindClasses",
+        "title": "Tailwind OCD: Sort Tailwind Classes in Current File"
+      }
+    ],
+    "configuration": {
+      "title": "Tailwind OCD",
+      "properties": {
+        "tailwindOCD.sortOnSave": {
+          "type": "boolean",
+          "default": true,
+          "description": "Automatically sort Tailwind classes on save using Tailwind CSS IntelliSense."
+        }
+      }
+    }
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/suryami62/tailwindOCD.git"
+  },
+  "keywords": [
+    "tailwindcss",
+    "tailwind",
+    "sorting",
+    "headwind"
+  ],
+  "author": "suryami62",
+  "license": "MIT",
+  "type": "commonjs",
+  "bugs": {
+    "url": "https://github.com/suryami62/tailwindOCD/issues"
+  },
+  "homepage": "https://github.com/suryami62/tailwindOCD#readme"
+}
