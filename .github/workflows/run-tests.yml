@@ -1,0 +1,54 @@
+name: Run Tests
+
+on:
+  push:
+    branches:
+      - main
+      - master
+  pull_request:
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+        with:
+          submodules: recursive
+
+      - name: Enable Corepack
+        run: corepack enable
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: 20
+
+      - name: Run tailwindcss-intellisense checks and tests
+        working-directory: tailwindcss-intellisense
+        run: |
+          if [ -f pnpm-lock.yaml ]; then
+            pnpm install --frozen-lockfile
+            pnpm --filter vscode-tailwindcss check
+            pnpm --filter @tailwindcss/language-server test tests/commands/commands.test.js
+          else
+            echo "pnpm-lock.yaml not found, skipping tailwindcss-intellisense tests."
+          fi
+
+      - name: Run headwind tests
+        working-directory: headwind
+        run: |
+          if [ -f package.json ]; then
+            if [ -f package-lock.json ]; then
+              npm ci
+            else
+              npm install
+            fi
+            npm test --if-present
+          else
+            echo "package.json not found, skipping headwind tests."
+          fi
