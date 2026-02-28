@@ -10,3 +10,10 @@ Tailwind OCD menambahkan penyortiran class Tailwind CSS ala Headwind dengan mema
 ## Kebutuhan
 
 Ekstensi ini membutuhkan ekstensi **Tailwind CSS IntelliSense** (`bradlc.vscode-tailwindcss`) karena proses sorting dilakukan lewat integrasi command dari ekstensi tersebut.
+
+## Build VSIX
+
+```bash
+npm install
+npm run package:vsix
+```
