@@ -8,6 +8,9 @@
     "vscode": "^1.80.0"
   },
   "main": "./extension.js",
+  "scripts": {
+    "package:vsix": "vsce package --skip-license"
+  },
   "activationEvents": [
     "onCommand:tailwindOCD.sortTailwindClasses",
     "onStartupFinished"
@@ -45,6 +48,9 @@
   ],
   "author": "suryami62",
   "license": "MIT",
+  "devDependencies": {
+    "@vscode/vsce": "3.7.1"
+  },
   "type": "commonjs",
   "bugs": {
     "url": "https://github.com/suryami62/tailwindOCD/issues"
