@@ -1,19 +1,36 @@
 # Tailwind OCD
 
-Tailwind OCD menambahkan penyortiran class Tailwind CSS ala Headwind dengan memanfaatkan command bawaan `Tailwind CSS IntelliSense` (`tailwindCSS.sortSelection`).
+Keep your Tailwind classes clean, consistent, and drama-free.
 
-## Fitur
+`Tailwind OCD` brings Headwind-style class sorting to your workflow by calling the built-in **Tailwind CSS IntelliSense** command: `tailwindCSS.sortSelection`.
 
-- Command: **Tailwind OCD: Sort Tailwind Classes in Current File**
-- Otomatis sort saat save (`tailwindOCD.sortOnSave`, default: `true`)
+## Why Tailwind OCD?
 
-## Kebutuhan
+When class strings grow wild, readability drops and reviews get noisy. This extension helps you stay focused by keeping class order predictable—every time.
 
-Ekstensi ini membutuhkan ekstensi **Tailwind CSS IntelliSense** (`bradlc.vscode-tailwindcss`) karena proses sorting dilakukan lewat integrasi command dari ekstensi tersebut.
+## Features
+
+- **Command:** `Tailwind OCD: Sort Tailwind Classes in Current File`
+- **Auto-sort on save:** `tailwindOCD.sortOnSave` (default: `true`)
+- **Powered by Tailwind CSS IntelliSense** sorting engine for reliable ordering
+
+## Requirements
+
+This extension depends on **Tailwind CSS IntelliSense** (`bradlc.vscode-tailwindcss`).
+
+Without it, sorting cannot run because Tailwind OCD delegates sorting to IntelliSense's built-in command integration.
 
 ## Build VSIX
 
 ```bash
-npm install
-npm run package:vsix
+bun install
+bun run package:vsix
 ```
+
+## CI
+
+GitHub Actions workflow is available at [.github/workflows/package-vsix.yml](.github/workflows/package-vsix.yml) to:
+
+- build the extension
+- package the VSIX
+- upload artifacts
