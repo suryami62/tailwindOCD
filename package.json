@@ -1,8 +1,9 @@
 {
   "name": "tailwindocd",
   "displayName": "Tailwind OCD",
-  "description": "Sort Tailwind CSS classes like Headwind by using Tailwind CSS IntelliSense sorting",
-  "version": "0.0.1",
+  "icon": "media/icon.png",
+  "description": "Keep your Tailwind classes clean, consistent, and save your PR reviewers from quiet despair.",
+  "version": "0.1.1",
   "publisher": "suryami62",
   "engines": {
     "vscode": "^1.80.0"
@@ -12,6 +13,7 @@
     "clean": "rm -rf dist",
     "compile": "tsc -p ./",
     "compile:release": "bun run clean && tsc -p ./tsconfig.release.json",
+    "test": "bun test src/extension.test.ts",
     "watch": "tsc -watch -p ./",
     "prepackage:vsix": "bun run compile:release",
     "package:vsix": "bunx @vscode/vsce package --skip-license --no-dependencies"
@@ -32,6 +34,29 @@
           "type": "boolean",
           "default": true,
           "description": "Automatically sort Tailwind classes on save using Tailwind CSS IntelliSense."
+        },
+        "tailwindOCD.dynamicClassFunctions": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          },
+          "default": ["clsx", "cn", "classnames"],
+          "description": "Function names that should be scanned for Tailwind class strings."
+        },
+        "tailwindOCD.cleanDuplicates": {
+          "type": "boolean",
+          "default": true,
+          "description": "Remove duplicate Tailwind classes after sorting."
+        },
+        "tailwindOCD.cleanConflicts": {
+          "type": "boolean",
+          "default": true,
+          "description": "Remove simple conflicting utility classes by keeping the last one in the same variant scope."
+        },
+        "tailwindOCD.ignoreCommentMarker": {
+          "type": "string",
+          "default": "tailwindocd-ignore",
+          "description": "Skip sorting/cleaning for class strings on lines that contain this marker."
         }
       }
     }
