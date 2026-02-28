@@ -17,15 +17,15 @@ jobs:
         with:
           submodules: recursive
 
+      - name: Enable Corepack
+        run: corepack enable
+
       - name: Setup Node.js
         uses: actions/setup-node@v4
         with:
           node-version: 20
           cache: pnpm
           cache-dependency-path: tailwindcss-intellisense/pnpm-lock.yaml
-
-      - name: Enable Corepack
-        run: corepack enable
 
       - name: Run tailwindcss-intellisense checks and tests
         working-directory: tailwindcss-intellisense
