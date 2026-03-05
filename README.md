@@ -35,9 +35,18 @@ className="mt-4 bg-red-500 hover:text-white p-2 flex-col justify-center align-mi
 
 - <code>tailwindOCD.sortOnSave</code> (default: <code>true</code>) — auto-sort on save.
 - <code>tailwindOCD.dynamicClassFunctions</code> (default: <code>["clsx", "cn", "classnames"]</code>) — function names to scan.
+- <code>tailwindOCD.customClassRegex</code> (default: <code>[]</code>) — custom regex patterns to capture sortable class strings (supports <code>[outerRegex, innerRegex]</code> format like <code>tailwindCSS.experimental.classRegex</code>).
 - <code>tailwindOCD.cleanDuplicates</code> (default: <code>true</code>) — remove duplicate classes.
 - <code>tailwindOCD.cleanConflicts</code> (default: <code>true</code>) — keep the last utility in simple conflict groups.
 - <code>tailwindOCD.ignoreCommentMarker</code> (default: <code>tailwindocd-ignore</code>) — skip lines containing this marker.
+
+Example for Twig variables:
+
+```json
+"tailwindOCD.customClassRegex": [
+  ["{%\\s*set\\s+tw_\\w+\\s*=\\s*[\"'][^\"']*[\"']\\s*%}", "([\\w-:/\\[\\]]+)"]
+]
+```
 
 ## Requirements
 

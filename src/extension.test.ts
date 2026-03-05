@@ -49,11 +49,29 @@ function createMockDocument(text: string) {
     return new Position(line, boundedOffset - lineOffsets[line]);
   }
 
+  function offsetAt(position: ComparablePositionLike) {
+    const lineOffset = lineOffsets[position.line] ?? text.length;
+    return Math.max(0, Math.min(lineOffset + position.character, text.length));
+  }
+
   return {
     getText: () => text,
     lineAt: (lineNumber: number) => ({ text: lines[lineNumber] ?? "" }),
     positionAt,
+    offsetAt,
   };
+}
+
+function getSelectionTexts(
+  document: ReturnType<typeof createMockDocument>,
+  selections: Array<{ start: ComparablePositionLike; end: ComparablePositionLike }>,
+) {
+  const text = document.getText();
+  return selections.map((selection) => {
+    const startOffset = document.offsetAt(selection.start);
+    const endOffset = document.offsetAt(selection.end);
+    return text.slice(startOffset, endOffset);
+  });
 }
 
 describe("extension helper functions", () => {
@@ -129,6 +147,7 @@ describe("extension helper functions", () => {
     const selections = getClassSelections(document, {
       dynamicClassFunctions: ["clsx", "cn", "classnames"],
       ignoreCommentMarker: "tailwindocd-ignore",
+      customClassRegex: [],
     });
 
     expect(selections).toHaveLength(0);
@@ -141,8 +160,42 @@ describe("extension helper functions", () => {
     const selections = getClassSelections(document, {
       dynamicClassFunctions: ["clsx", "cn", "classnames"],
       ignoreCommentMarker: "tailwindocd-ignore",
+      customClassRegex: [],
     });
 
     expect(selections).toHaveLength(1);
+  });
+
+  it("captures custom class strings from a single regex pattern", () => {
+    const text = `{% set tw_myvariable = \"px-4 py-4\" %}`;
+    const document = createMockDocument(text);
+
+    const selections = getClassSelections(document, {
+      dynamicClassFunctions: ["clsx", "cn", "classnames"],
+      ignoreCommentMarker: "tailwindocd-ignore",
+      customClassRegex: [
+        "{%\\s*set\\s+tw_\\w+\\s*=\\s*[\"']([^\"']*)[\"']\\s*%}",
+      ],
+    });
+
+    expect(getSelectionTexts(document, selections)).toEqual(["px-4 py-4"]);
+  });
+
+  it("supports classRegex-style tuple patterns", () => {
+    const text = `{% set tw_myvariable = \"px-4 py-4\" %}`;
+    const document = createMockDocument(text);
+
+    const selections = getClassSelections(document, {
+      dynamicClassFunctions: ["clsx", "cn", "classnames"],
+      ignoreCommentMarker: "tailwindocd-ignore",
+      customClassRegex: [
+        [
+          "{%\\s*set\\s+tw_\\w+\\s*=\\s*[\"'][^\"']*[\"']\\s*%}",
+          "([\\w-:/\\[\\]]+)",
+        ],
+      ],
+    });
+
+    expect(getSelectionTexts(document, selections)).toEqual(["px-4 py-4"]);
   });
 });
