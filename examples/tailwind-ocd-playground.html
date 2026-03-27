@@ -1,0 +1,445 @@
+<!doctype html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Tailwind OCD Playground</title>
+    <style>
+        :root {
+            color-scheme: light;
+            --bg: #f6f1e8;
+            --panel: #fffdf8;
+            --ink: #1f2937;
+            --muted: #6b7280;
+            --line: #d6cfc2;
+            --accent: #c2410c;
+            --accent-soft: #fff1e8;
+            --mono: "Iosevka", "Cascadia Code", Consolas, monospace;
+            --sans: "Segoe UI", system-ui, sans-serif;
+        }
+
+        * {
+            box-sizing: border-box;
+        }
+
+        body {
+            margin: 0;
+            font-family: var(--sans);
+            background:
+                radial-gradient(circle at top left, rgba(194, 65, 12, 0.12), transparent 28%),
+                linear-gradient(180deg, #fbf7ef 0%, var(--bg) 100%);
+            color: var(--ink);
+        }
+
+        main {
+            width: min(1100px, calc(100% - 32px));
+            margin: 0 auto;
+            padding: 40px 0 72px;
+        }
+
+        header {
+            margin-bottom: 28px;
+        }
+
+        h1,
+        h2 {
+            line-height: 1.05;
+            letter-spacing: -0.03em;
+            margin: 0;
+        }
+
+        h1 {
+            font-size: clamp(2.3rem, 6vw, 4.4rem);
+            max-width: 10ch;
+        }
+
+        h2 {
+            font-size: 1.25rem;
+            margin-bottom: 12px;
+        }
+
+        p,
+        li {
+            color: var(--muted);
+            line-height: 1.6;
+        }
+
+        .lede {
+            max-width: 65ch;
+            margin-top: 14px;
+            font-size: 1.05rem;
+        }
+
+        .grid {
+            display: grid;
+            gap: 20px;
+        }
+
+        @media (min-width: 900px) {
+            .grid {
+                grid-template-columns: repeat(2, minmax(0, 1fr));
+            }
+        }
+
+        .card {
+            background: var(--panel);
+            border: 1px solid var(--line);
+            border-radius: 22px;
+            padding: 22px;
+            box-shadow: 0 18px 50px rgba(31, 41, 55, 0.06);
+        }
+
+        .label {
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            padding: 6px 10px;
+            border-radius: 999px;
+            background: var(--accent-soft);
+            color: var(--accent);
+            font-size: 0.8rem;
+            font-weight: 700;
+            text-transform: uppercase;
+            letter-spacing: 0.08em;
+            margin-bottom: 10px;
+        }
+
+        code,
+        pre {
+            font-family: var(--mono);
+        }
+
+        pre {
+            margin: 0;
+            padding: 14px;
+            background: #221d18;
+            color: #fff6e9;
+            border-radius: 16px;
+            overflow-x: auto;
+            font-size: 0.92rem;
+            line-height: 1.55;
+        }
+
+        .checklist {
+            padding-left: 18px;
+            margin: 10px 0 0;
+        }
+
+        .checklist li+li {
+            margin-top: 6px;
+        }
+
+        .stack {
+            display: grid;
+            gap: 16px;
+        }
+
+        .split {
+            display: grid;
+            gap: 14px;
+        }
+
+        @media (min-width: 760px) {
+            .split {
+                grid-template-columns: repeat(2, minmax(0, 1fr));
+            }
+        }
+
+        .caption {
+            margin: 0 0 8px;
+            color: var(--ink);
+            font-weight: 600;
+        }
+
+        .mini-note {
+            margin: 8px 0 0;
+            font-size: 0.95rem;
+        }
+
+        .demo-box {
+            border: 1px dashed var(--line);
+            border-radius: 16px;
+            padding: 14px;
+            background: rgba(255, 255, 255, 0.65);
+        }
+
+        .footer-note {
+            margin-top: 24px;
+            padding: 18px 20px;
+            border-left: 4px solid var(--accent);
+            background: rgba(194, 65, 12, 0.08);
+            border-radius: 12px;
+        }
+    </style>
+</head>
+
+<body>
+    <main>
+        <header>
+            <div class="label">Extension Playground</div>
+            <h1>Tailwind OCD feature torture test.</h1>
+            <p class="lede">
+                Open this file in a Tailwind-enabled project, run
+                <strong>Tailwind OCD: Sort Tailwind Classes in Current File</strong>,
+                then save it again to confirm sort-on-save. Every example below is
+                intentionally messy so you can verify sorting, duplicate cleanup,
+                conflict cleanup, dynamic function scanning, the ignore marker, and
+                custom regex support.
+            </p>
+        </header>
+
+        <section class="grid">
+            <article class="card">
+                <div class="label">What to Check</div>
+                <h2>Expected behavior</h2>
+                <ul class="checklist">
+                    <li>Utility order should follow Tailwind CSS IntelliSense sorting.</li>
+                    <li>Duplicate classes should collapse to the last occurrence.</li>
+                    <li>Simple conflicts like <code>p-2 p-6</code> should keep the last one.</li>
+                    <li>Variant scopes like <code>md:</code> and <code>hover:</code> should be respected.</li>
+                    <li>Lines containing <code>tailwindocd-ignore</code> should remain untouched.</li>
+                    <li>Strings inside <code>clsx()</code>, <code>cn()</code>, and <code>classnames()</code> should be
+                        processed.</li>
+                    <li>Multiline values and variant-heavy utility strings should stay semantically intact.</li>
+                    <li>Custom regex samples should only react after you enable the matching workspace setting.</li>
+                </ul>
+            </article>
+
+            <article class="card">
+                <div class="label">Settings</div>
+                <h2>Optional custom regex test</h2>
+                <pre>{
+  "tailwindOCD.customClassRegex": [
+    [
+      "{%\\s*set\\s+tw_\\w+\\s*=\\s*([\"'][^\"']*[\"'])\\s*%}",
+      "[\"']([^\"']*)[\"']"
+    ]
+  ]
+}</pre>
+                <p>
+                    With that setting enabled, the Twig-like sample at the bottom of
+                    this file becomes sortable too.
+                </p>
+            </article>
+        </section>
+
+        <section class="grid">
+            <article class="card">
+                <div class="label">Run Order</div>
+                <h2>Suggested experiment flow</h2>
+                <ol class="checklist">
+                    <li>Run the command once and inspect which blocks changed.</li>
+                    <li>Undo, disable <code>cleanDuplicates</code>, run again, and compare the diff.</li>
+                    <li>Undo, enable duplicates cleanup and disable <code>cleanConflicts</code>, then rerun.</li>
+                    <li>Save the file to confirm <code>sortOnSave</code> only affects supported matches.</li>
+                    <li>Enable <code>customClassRegex</code> and rerun to activate the Twig and helper samples.</li>
+                </ol>
+            </article>
+
+            <article class="card">
+                <div class="label">Diff Ideas</div>
+                <h2>What each area is good for</h2>
+                <ul class="checklist">
+                    <li><strong>HTML Attributes</strong>: baseline sorting plus duplicate/conflict cleanup.</li>
+                    <li><strong>Cleanup Matrix</strong>: isolate duplicate-only versus conflict-heavy behavior.</li>
+                    <li><strong>Ignore Marker</strong>: compare untouched and touchable lines side by side.</li>
+                    <li><strong>Dynamic Functions</strong>: validate quoted strings inside supported helper calls.</li>
+                    <li><strong>Custom Regex</strong>: confirm extra matches only appear after config is enabled.</li>
+                </ul>
+            </article>
+        </section>
+
+        <section class="card">
+            <div class="label">HTML Attributes</div>
+            <h2>Standard class attribute</h2>
+            <div class="stack">
+                <div
+                    class="lg:p-8 p-2 flex-col justify-center bg-red-500 hover:text-white p-6 opacity-50 block flex bg-red-500">
+                    Basic class attribute: order, duplicate cleanup, and display/spacing conflicts.
+                </div>
+
+                <div class="
+              text-white md:p-2 p-2 p-6 rounded-xl
+              hover:text-slate-100 bg-slate-900 px-3 px-6
+              md:p-4 flex flex-col hidden
+            ">
+                    Multiline class attribute: should still be sorted and cleaned.
+                </div>
+
+                <div
+                    class="max-w-lg max-w-2xl w-full w-1/2 text-left text-right md:hover:p-2 md:hover:p-6 md:hover:p-3">
+                    Variant-aware conflict case with width, text alignment, and scoped padding.
+                </div>
+            </div>
+        </section>
+
+        <section class="card">
+            <div class="label">Framework-ish Attributes</div>
+            <h2>Alternate attribute names supported by the parser</h2>
+            <div class="stack">
+                <button
+                    className="text-sm font-bold font-light rounded-md rounded-md bg-blue-600 px-2 py-2 px-4 hover:text-white">
+                    React-style className
+                </button>
+
+                <div ngClass="md:hover:p-2 md:hover:p-6 text-left text-center m-2 m-6 inline-flex hidden">
+                    Angular-style ngClass
+                </div>
+
+                <section class:list="grid block grid-cols-1 md:grid-cols-3 gap-2 gap-6 p-2 p-5">
+                    Astro-style class:list
+                </section>
+
+                <demo-card className="bg-white bg-zinc-100 shadow-md shadow-none px-4 px-8 py-3 py-2">
+                    Unknown custom element with className should still be picked up by regex scanning.
+                </demo-card>
+            </div>
+        </section>
+
+        <section class="card">
+            <div class="label">Cleanup Matrix</div>
+            <h2>Targeted duplicate and conflict experiments</h2>
+            <div class="split">
+                <div class="demo-box">
+                    <p class="caption">Duplicate-heavy, almost no conflict variety</p>
+                    <div class="rounded-xl rounded-xl bg-amber-200 bg-amber-200 text-sm text-sm px-4 py-2">
+                        Duplicate cleanup should be obvious here.
+                    </div>
+                </div>
+
+                <div class="demo-box">
+                    <p class="caption">Conflict-heavy spacing and display</p>
+                    <div class="p-2 p-8 block inline-flex hidden m-2 m-5">
+                        Conflict cleanup should keep the last utility per group.
+                    </div>
+                </div>
+
+                <div class="demo-box">
+                    <p class="caption">Scoped conflicts should stay within their own variants</p>
+                    <div class="p-2 md:p-2 md:p-8 hover:p-1 hover:p-4 lg:hover:p-2 lg:hover:p-6">
+                        Default, <code>md:</code>, <code>hover:</code>, and <code>lg:hover:</code> should be handled
+                        separately.
+                    </div>
+                </div>
+
+                <div class="demo-box">
+                    <p class="caption">Axes that should not collapse into one another</p>
+                    <div class="px-2 px-6 py-1 py-4 space-x-2 space-x-6 space-y-1 space-y-4">
+                        X and Y axes should be cleaned independently.
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <section class="card">
+            <div class="label">Ignore Marker</div>
+            <h2>Ignored and non-ignored lines side by side</h2>
+            <div class="split">
+                <div class="demo-box">
+                    <p class="caption">Ignored line</p>
+                    <div class="p-8 p-2 hidden block bg-emerald-400 bg-emerald-400">This line should not change.</div>
+                    <!-- tailwindocd-ignore -->
+                    <p class="mini-note">This one is your control sample for the ignore marker.</p>
+                </div>
+
+                <div class="demo-box">
+                    <p class="caption">Same kind of mess, but sortable</p>
+                    <div class="p-8 p-2 hidden block bg-emerald-400 bg-emerald-500">This line should change.</div>
+                    <p class="mini-note">If this one changes and the other one does not, the marker works.</p>
+                </div>
+            </div>
+        </section>
+
+        <section class="card">
+            <div class="label">Dynamic Functions</div>
+            <h2>Quoted strings inside clsx, cn, and classnames</h2>
+            <pre><code>&lt;script type="module"&gt;
+  const isPrimary = true;
+  const isOpen = false;
+  const clsx = (...parts) =&gt; parts.filter(Boolean).join(" ");
+  const cn = clsx;
+  const classnames = clsx;
+
+  const buttonClasses = clsx(
+    "rounded-md bg-orange-500 px-2 px-5 text-white text-white block inline-flex",
+    isPrimary &amp;&amp; "font-bold font-light hover:text-zinc-50",
+    isOpen ? "md:p-2 md:p-6" : "p-2 p-4"
+  );
+
+  const panelClasses = cn(
+    "grid block gap-2 gap-6 rounded-2xl rounded-3xl",
+    "md:hover:m-2 md:hover:m-8"
+  );
+
+  const badgeClasses = classnames(
+    "inline-flex hidden items-center text-left text-right",
+    true &amp;&amp; "py-1 py-3"
+  );
+
+  const nestedClasses = clsx(
+    "w-full w-1/2 min-w-40 min-w-80",
+    isPrimary &amp;&amp; clsx("text-left text-right", "font-medium font-black")
+  );
+
+  const customHelperClasses = tw(
+    "rounded-xl rounded-none px-2 px-7 bg-white bg-zinc-200"
+  );
+
+  console.log({ buttonClasses, panelClasses, badgeClasses, nestedClasses, customHelperClasses });
+&lt;/script&gt;</code></pre>
+            <p class="mini-note">
+                <code>tw()</code> is intentionally not part of the default dynamic helper list,
+                so it is useful for testing an updated <code>dynamicClassFunctions</code> config.
+            </p>
+        </section>
+
+        <section class="card">
+            <div class="label">Function Config</div>
+            <h2>Optional dynamic helper expansion</h2>
+            <pre>{
+  "tailwindOCD.dynamicClassFunctions": [
+    "clsx",
+    "cn",
+    "classnames",
+    "tw"
+  ]
+}</pre>
+            <p class="mini-note">
+                Enable this if you want the <code>tw()</code> sample above to participate in sorting too.
+            </p>
+        </section>
+
+        <section class="card">
+            <div class="label">Custom Regex</div>
+            <h2>Twig-style sample for customClassRegex</h2>
+            <pre><code>{% set tw_card = "text-white bg-slate-900 px-2 px-6 p-2 p-5 flex hidden md:hover:m-2 md:hover:m-6" %}
+{% set tw_banner = "rounded-lg rounded-3xl block inline-flex text-left text-center" %}
+
+tw("bg-white bg-slate-100 px-3 px-7 rounded-2xl rounded-none")
+tw("font-light font-bold inline hidden text-left text-right")</code></pre>
+            <p class="mini-note">
+                The Twig lines are for tuple-style regex. The <code>tw()</code> lines are useful if
+                you want to try a single-pattern custom regex that extracts quoted strings from helper calls.
+            </p>
+        </section>
+
+        <section class="card">
+            <div class="label">Stress Case</div>
+            <h2>Long messy string for diff-heavy experiments</h2>
+            <div
+                class="relative static block flex inline-flex text-left text-center w-full w-1/3 min-h-20 min-h-32 bg-white bg-stone-100 rounded-lg rounded-3xl p-2 p-7 px-2 px-8 py-1 py-5 hover:p-1 hover:p-6 md:hover:p-2 md:hover:p-8 lg:p-4 lg:p-10">
+                This block is intentionally noisy so command output and undo/redo cycles are easier to inspect.
+            </div>
+        </section>
+
+        <p class="footer-note">
+            Tip: if you want to isolate one feature at a time, temporarily disable
+            <code>tailwindOCD.cleanDuplicates</code> or
+            <code>tailwindOCD.cleanConflicts</code> in workspace settings and rerun
+            the command.
+        </p>
+    </main>
+</body>
+
+</html>

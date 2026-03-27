@@ -1,5 +1,9 @@
 import * as vscode from "vscode";
-import { CLASS_ATTRIBUTE_REGEX, ClassSelectionOptions } from "../constants";
+import {
+  CLASS_ATTRIBUTE_REGEX,
+  ClassSelectionOptions,
+  CustomClassRegexSetting,
+} from "../constants";
 import {
   escapeForRegex,
   findClosingParen,
@@ -33,6 +37,117 @@ function shouldIgnoreSelection(
   }
 
   return false;
+}
+
+function ensureGlobalRegex(pattern: RegExp): RegExp {
+  const flags = pattern.flags.includes("g")
+    ? pattern.flags
+    : `${pattern.flags}g`;
+  return new RegExp(pattern.source, flags);
+}
+
+function ensureGlobalAndIndicesRegex(pattern: RegExp): RegExp {
+  const globalPattern = ensureGlobalRegex(pattern);
+  const flags = globalPattern.flags.includes("d")
+    ? globalPattern.flags
+    : `${globalPattern.flags}d`;
+  return new RegExp(globalPattern.source, flags);
+}
+
+function parseRegexPattern(patternSource: string): RegExp | null {
+  const trimmedPattern = patternSource.trim();
+  if (!trimmedPattern) return null;
+
+  try {
+    if (trimmedPattern.startsWith("/")) {
+      const lastSlashIndex = trimmedPattern.lastIndexOf("/");
+      if (lastSlashIndex > 0) {
+        const source = trimmedPattern.slice(1, lastSlashIndex);
+        const flags = trimmedPattern.slice(lastSlashIndex + 1);
+        return ensureGlobalRegex(new RegExp(source, flags));
+      }
+    }
+
+    return new RegExp(trimmedPattern, "g");
+  } catch {
+    return null;
+  }
+}
+
+type IndexedMatch = RegExpExecArray & {
+  indices?: Array<[number, number] | undefined>;
+};
+
+function getFirstCaptureRange(match: IndexedMatch): [number, number] | null {
+  const captureIndices = match.indices?.[1];
+  if (!captureIndices) return null;
+
+  const capturedValue = match[1];
+  if (capturedValue === undefined) return null;
+
+  return captureIndices;
+}
+
+function addCustomRegexSelections(
+  text: string,
+  customClassRegex: CustomClassRegexSetting[],
+  addSelection: (startOffset: number, endOffset: number) => void,
+): void {
+  for (const entry of customClassRegex) {
+    const patterns = Array.isArray(entry) ? entry : [entry];
+    const outerPattern = patterns[0];
+    const innerPattern = patterns[1] ?? null;
+
+    if (!outerPattern) continue;
+
+    const outerRegex = parseRegexPattern(outerPattern);
+    if (!outerRegex) continue;
+
+    const indexedOuterRegex = ensureGlobalAndIndicesRegex(outerRegex);
+
+    let outerMatch: IndexedMatch | null;
+    while ((outerMatch = indexedOuterRegex.exec(text) as IndexedMatch | null) !== null) {
+      if (!outerMatch[0]) {
+        indexedOuterRegex.lastIndex += 1;
+        continue;
+      }
+
+      const containerRange = getFirstCaptureRange(outerMatch);
+      if (!containerRange) continue;
+
+      const [outerMatchStart, outerMatchEnd] = containerRange;
+      const containerText = text.slice(outerMatchStart, outerMatchEnd);
+
+      if (!innerPattern) {
+        addSelection(outerMatchStart, outerMatchEnd);
+        continue;
+      }
+
+      const innerRegex = parseRegexPattern(innerPattern);
+      if (!innerRegex) continue;
+
+      const indexedInnerRegex = ensureGlobalAndIndicesRegex(innerRegex);
+
+      let innerMatch: IndexedMatch | null;
+      while (
+        (innerMatch = indexedInnerRegex.exec(containerText) as IndexedMatch | null) !== null
+      ) {
+        if (!innerMatch[0]) {
+          indexedInnerRegex.lastIndex += 1;
+          continue;
+        }
+
+        const innerRange = getFirstCaptureRange(innerMatch);
+        if (!innerRange) continue;
+
+        const [innerMatchStart, innerMatchEnd] = innerRange;
+        addSelection(
+          outerMatchStart + innerMatchStart,
+          outerMatchStart + innerMatchEnd,
+        );
+      }
+    }
+  }
 }
 
 export function getClassSelections(
@@ -103,6 +218,10 @@ export function getClassSelections(
         addSelection(quotedRange.start, quotedRange.end);
       }
     }
+  }
+
+  if (options.customClassRegex.length > 0) {
+    addCustomRegexSelections(text, options.customClassRegex, addSelection);
   }
 
   selections.sort((a, b) => a.start.compareTo(b.start));

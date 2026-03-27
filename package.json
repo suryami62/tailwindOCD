@@ -3,7 +3,7 @@
   "displayName": "Tailwind OCD",
   "icon": "media/icon.png",
   "description": "Sort Tailwind classes automatically, clean duplicates/conflicts, and make your PRs look suspiciously well-organized.",
-  "version": "0.2.0",
+  "version": "0.3.1",
   "publisher": "suryami62",
   "engines": {
     "vscode": "^1.80.0"
@@ -50,6 +50,26 @@
             "classnames"
           ],
           "description": "Function names that should be scanned for Tailwind class strings."
+        },
+        "tailwindOCD.customClassRegex": {
+          "type": "array",
+          "default": [],
+          "items": {
+            "oneOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "array",
+                "minItems": 1,
+                "maxItems": 2,
+                "items": {
+                  "type": "string"
+                }
+              }
+            ]
+          },
+          "markdownDescription": "Custom regex patterns to find sortable Tailwind class strings using upstream-compatible `tailwindCSS.experimental.classRegex` semantics. Use either a single regex string, `[outerRegex]`, or `[outerRegex, innerRegex]`. The first capture group is used as the class container, and tuple patterns also require the inner regex to expose the class list in its first capture group."
         },
         "tailwindOCD.cleanDuplicates": {
           "type": "boolean",
