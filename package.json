@@ -3,7 +3,7 @@
   "displayName": "Tailwind OCD",
   "icon": "media/icon.png",
   "description": "Sort Tailwind classes automatically, clean duplicates/conflicts, and make your PRs look suspiciously well-organized.",
-  "version": "0.3.0",
+  "version": "0.3.1",
   "publisher": "suryami62",
   "engines": {
     "vscode": "^1.80.0"
