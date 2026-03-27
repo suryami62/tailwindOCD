@@ -46,6 +46,14 @@ function ensureGlobalRegex(pattern: RegExp): RegExp {
   return new RegExp(pattern.source, flags);
 }
 
+function ensureGlobalAndIndicesRegex(pattern: RegExp): RegExp {
+  const globalPattern = ensureGlobalRegex(pattern);
+  const flags = globalPattern.flags.includes("d")
+    ? globalPattern.flags
+    : `${globalPattern.flags}d`;
+  return new RegExp(globalPattern.source, flags);
+}
+
 function parseRegexPattern(patternSource: string): RegExp | null {
   const trimmedPattern = patternSource.trim();
   if (!trimmedPattern) return null;
@@ -66,26 +74,18 @@ function parseRegexPattern(patternSource: string): RegExp | null {
   }
 }
 
-function addFirstCapturedGroupSelection(
-  match: RegExpExecArray,
-  matchStartOffset: number,
-  addSelection: (startOffset: number, endOffset: number) => void,
-): boolean {
-  for (let groupIndex = 1; groupIndex < match.length; groupIndex += 1) {
-    const capturedValue = match[groupIndex];
-    if (!capturedValue || !capturedValue.trim()) continue;
+type IndexedMatch = RegExpExecArray & {
+  indices?: Array<[number, number] | undefined>;
+};
 
-    const relativeIndex = match[0].indexOf(capturedValue);
-    if (relativeIndex < 0) continue;
+function getFirstCaptureRange(match: IndexedMatch): [number, number] | null {
+  const captureIndices = match.indices?.[1];
+  if (!captureIndices) return null;
 
-    addSelection(
-      matchStartOffset + relativeIndex,
-      matchStartOffset + relativeIndex + capturedValue.length,
-    );
-    return true;
-  }
+  const capturedValue = match[1];
+  if (capturedValue === undefined) return null;
 
-  return false;
+  return captureIndices;
 }
 
 function addCustomRegexSelections(
@@ -94,111 +94,57 @@ function addCustomRegexSelections(
   addSelection: (startOffset: number, endOffset: number) => void,
 ): void {
   for (const entry of customClassRegex) {
-    const isPairEntry = Array.isArray(entry);
-    const outerPattern = isPairEntry ? entry[0] : entry;
-    const innerPattern = isPairEntry ? entry[1] : null;
+    const patterns = Array.isArray(entry) ? entry : [entry];
+    const outerPattern = patterns[0];
+    const innerPattern = patterns[1] ?? null;
 
     if (!outerPattern) continue;
 
     const outerRegex = parseRegexPattern(outerPattern);
     if (!outerRegex) continue;
 
-    let outerMatch: RegExpExecArray | null;
-    while ((outerMatch = outerRegex.exec(text)) !== null) {
+    const indexedOuterRegex = ensureGlobalAndIndicesRegex(outerRegex);
+
+    let outerMatch: IndexedMatch | null;
+    while ((outerMatch = indexedOuterRegex.exec(text) as IndexedMatch | null) !== null) {
       if (!outerMatch[0]) {
-        outerRegex.lastIndex += 1;
+        indexedOuterRegex.lastIndex += 1;
         continue;
       }
 
-      const outerMatchStart = outerMatch.index;
-      const outerMatchEnd = outerMatchStart + outerMatch[0].length;
+      const containerRange = getFirstCaptureRange(outerMatch);
+      if (!containerRange) continue;
 
-      if (innerPattern) {
-        const innerRegex = parseRegexPattern(innerPattern);
-        if (!innerRegex) continue;
+      const [outerMatchStart, outerMatchEnd] = containerRange;
+      const containerText = text.slice(outerMatchStart, outerMatchEnd);
 
-        const searchSegments: Array<{ text: string; startOffset: number }> = [];
-
-        if (outerMatch.length > 1) {
-          let searchFromIndex = 0;
-          for (let groupIndex = 1; groupIndex < outerMatch.length; groupIndex += 1) {
-            const capturedValue = outerMatch[groupIndex];
-            if (!capturedValue) continue;
-
-            const relativeIndex = outerMatch[0].indexOf(capturedValue, searchFromIndex);
-            if (relativeIndex < 0) continue;
-
-            searchSegments.push({
-              text: capturedValue,
-              startOffset: outerMatchStart + relativeIndex,
-            });
-            searchFromIndex = relativeIndex + capturedValue.length;
-          }
-        }
-
-        if (searchSegments.length === 0) {
-          const outerText = text.slice(outerMatchStart, outerMatchEnd);
-          const quotedRanges = getQuotedStringRanges(outerText, outerMatchStart);
-
-          for (const quotedRange of quotedRanges) {
-            searchSegments.push({
-              text: text.slice(quotedRange.start, quotedRange.end),
-              startOffset: quotedRange.start,
-            });
-          }
-
-          if (searchSegments.length === 0) {
-            searchSegments.push({
-              text: outerText,
-              startOffset: outerMatchStart,
-            });
-          }
-        }
-
-        let firstInnerStart = -1;
-        let lastInnerEnd = -1;
-
-        for (const segment of searchSegments) {
-          innerRegex.lastIndex = 0;
-          let innerMatch: RegExpExecArray | null;
-
-          while ((innerMatch = innerRegex.exec(segment.text)) !== null) {
-            if (!innerMatch[0]) {
-              innerRegex.lastIndex += 1;
-              continue;
-            }
-
-            const capturedValue = innerMatch[1] ?? innerMatch[0];
-            if (!capturedValue.trim()) continue;
-
-            const relativeIndex = innerMatch[0].indexOf(capturedValue);
-            const tokenStart =
-              segment.startOffset + innerMatch.index + Math.max(relativeIndex, 0);
-            const tokenEnd = tokenStart + capturedValue.length;
-
-            if (firstInnerStart < 0 || tokenStart < firstInnerStart) {
-              firstInnerStart = tokenStart;
-            }
-            if (tokenEnd > lastInnerEnd) {
-              lastInnerEnd = tokenEnd;
-            }
-          }
-        }
-
-        if (firstInnerStart >= 0 && lastInnerEnd > firstInnerStart) {
-          addSelection(firstInnerStart, lastInnerEnd);
-          continue;
-        }
+      if (!innerPattern) {
+        addSelection(outerMatchStart, outerMatchEnd);
+        continue;
       }
 
-      const hasCapturedGroup = addFirstCapturedGroupSelection(
-        outerMatch,
-        outerMatchStart,
-        addSelection,
-      );
+      const innerRegex = parseRegexPattern(innerPattern);
+      if (!innerRegex) continue;
 
-      if (!hasCapturedGroup) {
-        addSelection(outerMatchStart, outerMatchEnd);
+      const indexedInnerRegex = ensureGlobalAndIndicesRegex(innerRegex);
+
+      let innerMatch: IndexedMatch | null;
+      while (
+        (innerMatch = indexedInnerRegex.exec(containerText) as IndexedMatch | null) !== null
+      ) {
+        if (!innerMatch[0]) {
+          indexedInnerRegex.lastIndex += 1;
+          continue;
+        }
+
+        const innerRange = getFirstCaptureRange(innerMatch);
+        if (!innerRange) continue;
+
+        const [innerMatchStart, innerMatchEnd] = innerRange;
+        addSelection(
+          outerMatchStart + innerMatchStart,
+          outerMatchStart + innerMatchEnd,
+        );
       }
     }
   }

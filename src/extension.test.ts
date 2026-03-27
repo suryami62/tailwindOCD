@@ -190,10 +190,57 @@ describe("extension helper functions", () => {
       ignoreCommentMarker: "tailwindocd-ignore",
       customClassRegex: [
         [
-          "{%\\s*set\\s+tw_\\w+\\s*=\\s*[\"'][^\"']*[\"']\\s*%}",
-          "([\\w-:/\\[\\]]+)",
+          "{%\\s*set\\s+tw_\\w+\\s*=\\s*([\"'][^\"']*[\"'])\\s*%}",
+          "[\"']([^\"']*)[\"']",
         ],
       ],
+    });
+
+    expect(getSelectionTexts(document, selections)).toEqual(["px-4 py-4"]);
+  });
+
+  it("creates separate selections for each upstream tuple match", () => {
+    const text = `const value = clsx("px-4 py-4", isActive && "text-sm");`;
+    const document = createMockDocument(text);
+
+    const selections = getClassSelections(document, {
+      dynamicClassFunctions: ["clsx", "cn", "classnames"],
+      ignoreCommentMarker: "tailwindocd-ignore",
+      customClassRegex: [["clsx\\(([^)]*)\\)", "\"([^\"]*)\""]],
+    });
+
+    expect(getSelectionTexts(document, selections)).toEqual([
+      "px-4 py-4",
+      "text-sm",
+    ]);
+  });
+
+  it("requires an outer capture group for tuple patterns", () => {
+    const text = `{% set tw_myvariable = \"px-4 py-4\" %}`;
+    const document = createMockDocument(text);
+
+    const selections = getClassSelections(document, {
+      dynamicClassFunctions: ["clsx", "cn", "classnames"],
+      ignoreCommentMarker: "tailwindocd-ignore",
+      customClassRegex: [
+        [
+          "{%\\s*set\\s+tw_\\w+\\s*=\\s*[\"'][^\"']*[\"']\\s*%}",
+          "[\"']([^\"']*)[\"']",
+        ],
+      ],
+    });
+
+    expect(selections).toHaveLength(0);
+  });
+
+  it("accepts upstream single-element array patterns", () => {
+    const text = `const value = tw(\"px-4 py-4\");`;
+    const document = createMockDocument(text);
+
+    const selections = getClassSelections(document, {
+      dynamicClassFunctions: ["clsx", "cn", "classnames"],
+      ignoreCommentMarker: "tailwindocd-ignore",
+      customClassRegex: [["tw\\(\"([^\"]*)\"\\)"]],
     });
 
     expect(getSelectionTexts(document, selections)).toEqual(["px-4 py-4"]);

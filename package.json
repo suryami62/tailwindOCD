@@ -61,7 +61,7 @@
               },
               {
                 "type": "array",
-                "minItems": 2,
+                "minItems": 1,
                 "maxItems": 2,
                 "items": {
                   "type": "string"
@@ -69,7 +69,7 @@
               }
             ]
           },
-          "markdownDescription": "Custom regex patterns to find sortable Tailwind class strings. Supports a single regex string or a tuple `[outerRegex, innerRegex]` compatible with `tailwindCSS.experimental.classRegex`."
+          "markdownDescription": "Custom regex patterns to find sortable Tailwind class strings using upstream-compatible `tailwindCSS.experimental.classRegex` semantics. Use either a single regex string, `[outerRegex]`, or `[outerRegex, innerRegex]`. The first capture group is used as the class container, and tuple patterns also require the inner regex to expose the class list in its first capture group."
         },
         "tailwindOCD.cleanDuplicates": {
           "type": "boolean",

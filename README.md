@@ -35,7 +35,7 @@ className="mt-4 bg-red-500 hover:text-white p-2 flex-col justify-center align-mi
 
 - <code>tailwindOCD.sortOnSave</code> (default: <code>true</code>) — auto-sort on save.
 - <code>tailwindOCD.dynamicClassFunctions</code> (default: <code>["clsx", "cn", "classnames"]</code>) — function names to scan.
-- <code>tailwindOCD.customClassRegex</code> (default: <code>[]</code>) — custom regex patterns to capture sortable class strings (supports <code>[outerRegex, innerRegex]</code> format like <code>tailwindCSS.experimental.classRegex</code>).
+- <code>tailwindOCD.customClassRegex</code> (default: <code>[]</code>) — custom regex patterns using upstream-compatible <code>tailwindCSS.experimental.classRegex</code> semantics. You can use a single regex string, <code>[outerRegex]</code>, or <code>[outerRegex, innerRegex]</code>. The first capture group of <code>outerRegex</code> is required; for tuple patterns, the first capture group of <code>innerRegex</code> is used as the sortable class list.
 - <code>tailwindOCD.cleanDuplicates</code> (default: <code>true</code>) — remove duplicate classes.
 - <code>tailwindOCD.cleanConflicts</code> (default: <code>true</code>) — keep the last utility in simple conflict groups.
 - <code>tailwindOCD.ignoreCommentMarker</code> (default: <code>tailwindocd-ignore</code>) — skip lines containing this marker.
@@ -44,7 +44,7 @@ Example for Twig variables:
 
 ```json
 "tailwindOCD.customClassRegex": [
-  ["{%\\s*set\\s+tw_\\w+\\s*=\\s*[\"'][^\"']*[\"']\\s*%}", "([\\w-:/\\[\\]]+)"]
+  ["{%\\s*set\\s+tw_\\w+\\s*=\\s*([\"'][^\"']*[\"'])\\s*%}", "[\"']([^\"']*)[\"']"]
 ]
 ```
 
@@ -65,6 +65,10 @@ Then in VS Code:
 1. Open a project that uses Tailwind.
 2. Run <strong>Tailwind OCD: Sort Tailwind Classes in Current File</strong>.
 3. Save and enjoy cleaner diffs you can pretend happened naturally.
+
+## Playground File
+
+<p align="justify">If you want a single file that exercises the extension's main features, open <a href="examples/tailwind-ocd-playground.html"><code>examples/tailwind-ocd-playground.html</code></a>. It includes messy samples for <code>class</code>, <code>className</code>, <code>ngClass</code>, <code>class:list</code>, dynamic class helpers like <code>clsx()</code>, the ignore marker, and a custom-regex example.</p>
 
 ## Building the Extension (VSIX)
 
