@@ -3,7 +3,7 @@
   "displayName": "Tailwind OCD",
   "icon": "media/icon.png",
   "description": "Sort Tailwind classes automatically, clean duplicates/conflicts, and make your PRs look suspiciously well-organized.",
-  "version": "0.3.1",
+  "version": "0.3.2",
   "publisher": "suryami62",
   "engines": {
     "vscode": "^1.80.0"
@@ -13,7 +13,7 @@
     "clean": "rm -rf dist",
     "compile": "tsc -p ./",
     "compile:release": "bun run clean && tsc -p ./tsconfig.release.json",
-    "test": "bun test src/extension.test.ts",
+    "test": "bun test src/test",
     "watch": "tsc -watch -p ./",
     "prepackage:vsix": "bun run compile:release",
     "package:vsix": "bunx @vscode/vsce package --skip-license --no-dependencies"

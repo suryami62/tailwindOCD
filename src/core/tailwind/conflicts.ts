@@ -16,6 +16,8 @@ const CONFLICT_GROUP_PATTERNS: Array<[RegExp, string]> = [
   ],
 ];
 
+const conflictKeyCache = new Map<string, string | null>();
+
 function getSpacingConflictGroup(utilityToken: string): string | null {
   const spacingMatch = utilityToken.match(/^(p|m)(x|y|t|r|b|l)?-/);
   if (spacingMatch) {
@@ -35,6 +37,10 @@ function getSpacingConflictGroup(utilityToken: string): string | null {
 export function getClassConflictKey(token: string): string | null {
   const trimmedToken = token.trim();
   if (!trimmedToken) return null;
+
+  if (conflictKeyCache.has(trimmedToken)) {
+    return conflictKeyCache.get(trimmedToken) ?? null;
+  }
 
   let lastVariantSeparatorIndex = -1;
   let squareBracketDepth = 0;
@@ -62,18 +68,26 @@ export function getClassConflictKey(token: string): string | null {
 
   if (utilityToken.startsWith("!")) utilityToken = utilityToken.slice(1);
   if (utilityToken.startsWith("-")) utilityToken = utilityToken.slice(1);
-  if (!utilityToken) return null;
+  if (!utilityToken) {
+    conflictKeyCache.set(trimmedToken, null);
+    return null;
+  }
 
   const spacingConflictGroup = getSpacingConflictGroup(utilityToken);
   if (spacingConflictGroup) {
-    return `${variantPrefix}|${spacingConflictGroup}`;
+    const conflictKey = `${variantPrefix}|${spacingConflictGroup}`;
+    conflictKeyCache.set(trimmedToken, conflictKey);
+    return conflictKey;
   }
 
   for (const [conflictRegex, conflictGroup] of CONFLICT_GROUP_PATTERNS) {
     if (conflictRegex.test(utilityToken)) {
-      return `${variantPrefix}|${conflictGroup}`;
+      const conflictKey = `${variantPrefix}|${conflictGroup}`;
+      conflictKeyCache.set(trimmedToken, conflictKey);
+      return conflictKey;
     }
   }
 
+  conflictKeyCache.set(trimmedToken, null);
   return null;
 }

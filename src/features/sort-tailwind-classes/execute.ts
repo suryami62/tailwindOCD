@@ -1,12 +1,6 @@
 import * as vscode from "vscode";
-import {
-  ClassSelectionOptions,
-  DEFAULT_CUSTOM_CLASS_REGEX,
-  DEFAULT_DYNAMIC_CLASS_FUNCTIONS,
-  DEFAULT_IGNORE_COMMENT,
-} from "../util/constants";
-import { getClassSelections } from "../util/document";
-import { cleanClassList } from "../util/tailwind";
+import { getClassSelections, type ClassSelectionOptions } from "../../core/document";
+import { cleanClassList } from "../../core/tailwind";
 
 async function cleanSelectionsInEditor(
   editor: vscode.TextEditor,
@@ -38,30 +32,12 @@ async function cleanSelectionsInEditor(
   });
 }
 
-export async function sortActiveEditorClasses(): Promise<void> {
-  const editor = vscode.window.activeTextEditor;
-  if (!editor) return;
-
-  const config = vscode.workspace.getConfiguration(
-    "tailwindOCD",
-    editor.document.uri,
-  );
-  const selectionOptions: ClassSelectionOptions = {
-    dynamicClassFunctions:
-      config.get<string[]>(
-        "dynamicClassFunctions",
-        DEFAULT_DYNAMIC_CLASS_FUNCTIONS,
-      ) ?? DEFAULT_DYNAMIC_CLASS_FUNCTIONS,
-    ignoreCommentMarker:
-      config.get<string>("ignoreCommentMarker", DEFAULT_IGNORE_COMMENT) ??
-      DEFAULT_IGNORE_COMMENT,
-    customClassRegex:
-      config.get("customClassRegex", DEFAULT_CUSTOM_CLASS_REGEX) ??
-      DEFAULT_CUSTOM_CLASS_REGEX,
-  };
-  const cleanDuplicates = config.get<boolean>("cleanDuplicates", true);
-  const cleanConflicts = config.get<boolean>("cleanConflicts", true);
-
+export async function sortEditorClasses(
+  editor: vscode.TextEditor,
+  selectionOptions: ClassSelectionOptions,
+  cleanDuplicates: boolean,
+  cleanConflicts: boolean,
+): Promise<void> {
   const selections = getClassSelections(editor.document, selectionOptions);
   if (selections.length === 0) return;
 

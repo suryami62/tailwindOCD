@@ -1,6 +1,8 @@
 import * as vscode from "vscode";
-import { sortActiveEditorClasses } from "./commands/sortTailwindClasses";
-import { registerSortOnSave } from "./listeners/sortOnSave";
+import {
+  registerSortOnSave,
+  sortActiveEditorClasses,
+} from "./features/sort-tailwind-classes";
 
 export function activate(context: vscode.ExtensionContext): void {
   const sortCommand = vscode.commands.registerCommand(

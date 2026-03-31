@@ -4,6 +4,7 @@
     "sourceMap": false
   },
   "exclude": [
+    "src/test/**",
     "src/**/*.test.ts",
     "src/**/*.spec.ts"
   ]
