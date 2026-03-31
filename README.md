@@ -59,6 +59,13 @@ Example for Twig variables:
 ```bash
 bun install
 bun run compile
+bun run test
+```
+
+For the local verification loop:
+
+```bash
+bun run test
 ```
 
 Then in VS Code:

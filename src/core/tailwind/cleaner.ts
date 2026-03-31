@@ -5,33 +5,38 @@ export function cleanClassList(
   cleanDuplicates: boolean,
   cleanConflicts: boolean,
 ): string {
-  const classTokens = classList.split(/\s+/).filter(Boolean);
-  if (classTokens.length <= 1) return classList.trim();
+  const classTokens = classList.match(/\S+/g);
+  if (!classTokens) return "";
+  if (classTokens.length <= 1) return classTokens[0] ?? "";
 
   const keptTokens: string[] = [];
-  const seenClassTokens = new Set<string>();
-  const seenConflictKeys = new Set<string>();
+  const seenClassTokens = cleanDuplicates ? new Set<string>() : null;
+  const seenConflictKeys = cleanConflicts ? new Set<string>() : null;
 
   for (let i = classTokens.length - 1; i >= 0; i -= 1) {
     const classToken = classTokens[i];
 
-    if (cleanDuplicates && seenClassTokens.has(classToken)) {
+    if (seenClassTokens?.has(classToken)) {
       continue;
     }
 
     const conflictKey = cleanConflicts ? getClassConflictKey(classToken) : null;
-    if (cleanConflicts && conflictKey && seenConflictKeys.has(conflictKey)) {
+    if (conflictKey && seenConflictKeys?.has(conflictKey)) {
       continue;
     }
 
-    if (cleanDuplicates) {
+    if (seenClassTokens) {
       seenClassTokens.add(classToken);
     }
-    if (cleanConflicts && conflictKey) {
+    if (seenConflictKeys && conflictKey) {
       seenConflictKeys.add(conflictKey);
     }
 
     keptTokens.push(classToken);
+  }
+
+  if (!cleanDuplicates && !cleanConflicts) {
+    return classTokens.join(" ");
   }
 
   return keptTokens.reverse().join(" ");
